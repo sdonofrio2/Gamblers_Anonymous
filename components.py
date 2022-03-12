@@ -189,9 +189,10 @@ class Chips:
 
     def win_bet(self):
         self.total += self.bet
-
+        return self.total
     def lose_bet(self):
         self.total -= self.bet
+        return self.total
 
 class GamePlay:
     def __init__(self, player, dealer, game_deck, blackjack_multiplier):
@@ -226,7 +227,6 @@ class GamePlay:
             if self.player.best_outcome == 'Bust':
                 self.commentary.append(
                     "Player busted. No need for Dealer to go. Player loses their initial bet")
-                chips.lose_bet()
             elif self.player.best_outcome == 'Blackjack' and self.dealer.cards[0].rank not in [1, 10]:
                 self.commentary.append("Player has Blackjack. Dealer has no chance to hit Blackjack. Player wins {} times their initial bet".format(
                     str(self.blackjack_multiplier)))

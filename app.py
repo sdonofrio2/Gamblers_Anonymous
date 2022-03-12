@@ -23,7 +23,6 @@ number_of_decks = 6
 blackjack_multiplier = 1.5
 
 
-
 # Initialize player, dealer, deck and game play. Cache these variables
 @st.cache(allow_output_mutation=True, suppress_st_warning=True)
 def start_game():
@@ -75,6 +74,24 @@ if 'Stand' in player.possible_actions:
 
 
 game_play.update()
+    #if len(self.player.possible_actions) == 0:
+
+
+if player.best_outcome == 'Bust':
+    player_chips.lose_bet()
+elif player.best_outcome == 'Blackjack' and dealer.cards[0].rank not in [1, 10]:
+    player_chips.win_bet() #* blackjack_multiplier
+elif dealer.best_outcome == 'Bust':
+    player_chips.win_bet()
+elif dealer.best_outcome == 'Blackjack' and player.best_outcome != 'Blackjack':
+    player_chips.lose_bet()
+elif dealer.best_outcome != 'Blackjack' and player.best_outcome == 'Blackjack':
+    player_chips.win_bet() #* blackjack_multiplier
+# elif int(dealer.best_outcome) > int(player.best_outcome):
+#     player_chips.lose_bet()
+
+st.subheader(player_chips.total)
+
 player_stats.write(player)
 player_images.image([Image.open(card.image_location)
                      for card in player.cards], width=100)
