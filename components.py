@@ -1,12 +1,14 @@
 import random
 import streamlit as st
 
+@st.cache(allow_output_mutation=True, suppress_st_warning=True)
 class Bank_Account:
    
     def __init__(self):
     #global balance   
         self.balance=0
- 
+
+
     def deposit(self):
         amount=float(st.text_input("Enter amount to be Deposited: ", key = "2"))
         self.balance += amount
@@ -176,11 +178,11 @@ class Player(Dealer):
 B = Bank_Account()
   
 # Calling functions with that class object
-B.deposit()
-B.withdraw()
-B.display()
-B.balance
-
+# B.deposit()
+# B.withdraw()
+# B.display()
+# B.balance
+@st.cache(allow_output_mutation=True, suppress_st_warning=True)
 class Chips:  
 
     def __init__(self):
@@ -201,6 +203,7 @@ class GamePlay:
         self.game_deck = game_deck
         self.blackjack_multiplier = blackjack_multiplier
         self.commentary = []
+
 
     def __repr__(self):
         return "Commentary: {}".format(self.commentary)
@@ -256,6 +259,18 @@ class GamePlay:
                         str(self.dealer.best_outcome), str(self.player.best_outcome)))
         else:
             pass
+        
+    # def update_chips(self):
+    #     if self.player.best_outcome == 'Bust':
+    #         self.chips.lose_bet()
+    #     elif self.player.best_outcome == 'Blackjack' and self.dealer.cards[0].rank not in [1, 10]:
+    #         self.chips.win_bet() #* blackjack_multiplier
+    #     elif self.dealer.best_outcome == 'Bust':
+    #         self.chips.win_bet()
+    #     elif self.dealer.best_outcome == 'Blackjack' and self.player.best_outcome != 'Blackjack':
+    #         self.chips.lose_bet()
+    #     elif self.dealer.best_outcome != 'Blackjack' and self.player.best_outcome == 'Blackjack':
+    #         self.chips.win_bet() #* blackjack_multiplier
 
     def reset(self):
         self.commentary = []
@@ -269,3 +284,4 @@ class GamePlay:
         self.dealer.hit(self.game_deck)
         self.player.hit(self.game_deck)
         self.player.get_possibilities(self)
+        #st.subheader(self.chips.total)
