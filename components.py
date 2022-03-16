@@ -195,6 +195,9 @@ class Chips:
     def lose_bet(self):
         self.total -= self.bet
         return self.total
+    def win_bet_bj(self):
+        self.total += (self.bet * 1.5 )
+        return self.total
 
 class GamePlay:
     def __init__(self, player, dealer, game_deck, blackjack_multiplier):

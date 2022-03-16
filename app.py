@@ -96,13 +96,13 @@ elif ga_sidebar == "Play Game":
         if player.best_outcome == 'Bust':
             player_chips.lose_bet()
         elif player.best_outcome == 'Blackjack' and dealer.cards[0].rank not in [1, 10]:
-            player_chips.win_bet() #* blackjack_multiplier
+            player_chips.win_bet_bj() #* blackjack_multiplier
         elif dealer.best_outcome == 'Bust':
             player_chips.win_bet()
         elif dealer.best_outcome == 'Blackjack' and player.best_outcome != 'Blackjack':
             player_chips.lose_bet()
         elif dealer.best_outcome != 'Blackjack' and player.best_outcome == 'Blackjack':
-            player_chips.win_bet() #* blackjack_multiplier
+            player_chips.win_bet_bj() #* blackjack_multiplier
         elif dealer.best_outcome == "Awaiting Deal":
             0
         elif player.best_outcome == "Awaiting Deal":
