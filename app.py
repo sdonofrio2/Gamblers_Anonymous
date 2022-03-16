@@ -103,9 +103,15 @@ elif ga_sidebar == "Play Game":
             player_chips.lose_bet()
         elif dealer.best_outcome != 'Blackjack' and player.best_outcome == 'Blackjack':
             player_chips.win_bet() #* blackjack_multiplier
+        elif dealer.best_outcome == "Awaiting Deal":
+            0
+        elif player.best_outcome == "Awaiting Deal":
+            0
+        elif int(dealer.best_outcome) > int(player.best_outcome):
+            player_chips.lose_bet()
+        elif int(dealer.best_outcome) < int(player.best_outcome):
+            player_chips.win_bet()
         return player_chips.total
-    #elif int(dealer.best_outcome) > int(player.best_outcome):
-        #player_chips.lose_bet()
 
     update_chips_amt = update_chips()
     st.subheader(update_chips_amt)
