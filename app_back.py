@@ -1,9 +1,10 @@
-mport os
+import os
 import json
 from web3 import Web3
 from pathlib import Path
 from dotenv import load_dotenv
 import streamlit as st
+
 load_dotenv()
 # Define and connect a new Web3 provider
 w3 = Web3(Web3.HTTPProvider(os.getenv("WEB3_PROVIDER_URI")))
@@ -29,6 +30,8 @@ def load_contract():
         address=contract_address_Coin, abi=contract_abi_Coin
     )
     return contract_DEX, contract_coin
+
+
 # Load the contract
 contract_DEX, contract_coin = load_contract()
 ################################################################################
@@ -72,11 +75,15 @@ if st.button("Sell Tokens"):
     st.session_state["TokensInWallet"] -= sellAmount
     st.write("Transaction receipt minded:")
     st.write(dict(receipt_sell))
-tokenBalance = contract_coin.functions.balanceOf(address).call()
-st.write(f"Current amount of tokens: {tokenBalance}.")
-st.write("Send Tokens to the game table")
-tableCount = st.session_state["TokensAtTable"]
-st.write(f"You have currently {tableCount} tokens at the table")
+
+
+# tokenBalance = contract_coin.functions.balanceOf(address).call()
+# st.write(f"Current amount of tokens: {tokenBalance}.")
+# st.write("Send Tokens to the game table")
+# tableCount = st.session_state["TokensAtTable"]
+# st.write(f"You have currently {tableCount} tokens at the table")
+
+
 # Create a button to add tokens from the players wallet to the table.
 st.write("Send Tokens to the game table")
 tokensToTable = st.number_input(
@@ -96,6 +103,8 @@ if st.button("Add Tokens"):
     tokenBalance = contract_coin.functions.balanceOf(address).call()
     st.write(f"You have currently {tableCount} tokens at the table")
     st.write(f"Current amount of tokens in your wallet: {tokenBalance}.")
+
+
 # Button to close the table: all tokens at the table will be minted to the wallet
 if st.button("Close Table"):
     # Mint tokensToTable from account of player
@@ -120,6 +129,8 @@ if st.button("Close Table"):
             f"You have succesfully closed your table.You had no tokens left at your table."
         )
         st.write(f"Your Current amount of tokens in your wallet:  {tokenBalance}.")
+
+
 if st.button("Balance of Token"):
     tokenBalance = contract_coin.functions.balanceOf(address).call()
     st.write(tokenBalance)
