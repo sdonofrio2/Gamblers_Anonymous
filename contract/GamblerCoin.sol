@@ -57,7 +57,7 @@ import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v2.5
 contract DEX {
     using SafeMath for uint256;
 
-    uint256 public exchange_rate = 2;
+    uint256 public exchange_rate = 2500;
     address vault;
     GamblerCoin public token;
 
@@ -72,7 +72,6 @@ contract DEX {
     // Input is amount a Wei amount
     function buy() public payable {
         uint256 weiAmountTobuy = msg.value;
-
         uint256 tokenToBuy = _getTokenAmount(weiAmountTobuy);
         require(tokenToBuy >= 1, "You need to buy at least 1 Token.");
         require(weiAmountTobuy > 0, "You need to send some ether");
@@ -101,7 +100,7 @@ contract DEX {
         returns (uint256)
     {
         //uint256 exchange_rate = getPrice();
-        return weiAmount.mul(exchange_rate);
+        return weiAmount.mul(exchange_rate).div(10**18);
     }
 
     // Function to convert the amount of tokens to sell into amount of Wei.
@@ -111,7 +110,7 @@ contract DEX {
         returns (uint256)
     {
         //uint256 exchange_rate = getPrice();
-        return (TokenAmount).div(exchange_rate);
+        return (TokenAmount.mul(10**18)).div(exchange_rate);
     }
 
     /*

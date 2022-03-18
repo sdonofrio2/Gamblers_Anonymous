@@ -63,23 +63,29 @@ if ga_sidebar == "Deposit/Withdrawal Tokens":
             address
         ).call()
     st.write(st.session_state)
+
     ################################################################################
     # Initiate buttons for different functionalities
-    # Create a Buy button to buy tokens via the smart contract
+    # Create a Buy button to buy tokens
     st.write("Do you want to purchase tokens?")
-    amount = st.number_input("Insert a number", step=1) * 1000000000000000000
+    amount_tokens = st.number_input("Insert a number", step=1,)
+
     if st.button("Buy Tokens"):
+        st.session_state.TokensInWallet += amount_tokens
+        amount_wei = amount_tokens / 2500 * 1000000000000000000
+        # Buy function use the amount of wei as argument
         tx_hash = contract_DEX.functions.buy().transact(
-            {"from": address, "value": int(amount), "gas": 1000000}
+            {"from": address, "value": int(amount_wei), "gas": 1000000}
         )
         receipt = w3.eth.get_transaction_receipt(tx_hash)
-        st.session_state["TokensInWallet"] += amount
         st.write("Transaction receipt minded:")
         st.write(dict(receipt))
-    # Selling tokens via smart contract
+
+    # Create a Sell button to sell tokens
     st.write("Do you want to Sell tokens?")
-    sellAmount = st.number_input("Insert a sell amount", step=1) * 1000000000000000000
+    sellAmount = st.number_input("Insert a sell amount", step=1)
     if st.button("Sell Tokens"):
+        # Sell function use the amount of tokens as argument
         tx_hash_sell = contract_DEX.functions.sell(int(sellAmount)).transact(
             {"from": address, "gas": 1000000}
         )
@@ -87,6 +93,7 @@ if ga_sidebar == "Deposit/Withdrawal Tokens":
         st.session_state["TokensInWallet"] -= sellAmount
         st.write("Transaction receipt minded:")
         st.write(dict(receipt_sell))
+
     # Display token balance and table balance (i.e., in-game balance)
     tokenBalance = contract_coin.functions.balanceOf(address).call()
     st.write(f"Current amount of tokens: {tokenBalance}.")
@@ -99,8 +106,7 @@ if ga_sidebar == "Deposit/Withdrawal Tokens":
         "How many tokens do you want to play with today?", step=1
     )
     if st.button("Add Tokens"):
-        # Set variable to tableCount
-        tableCount += tokensToTable
+
         # Burn tokensToTable from account of player
         tx_hash_burn = contract_coin.functions.burn(
             address, int(tokensToTable)
