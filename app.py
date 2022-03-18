@@ -13,63 +13,63 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+################################################################################
+# Define and connect a new Web3 provider
+w3 = Web3(Web3.HTTPProvider(os.getenv("WEB3_PROVIDER_URI")))
+# Load-Contract function
+@st.cache(allow_output_mutation=True)
+def load_contract():
+    # Load the contract ABI for DEX
+    with open(Path("./contract/ABI_DEX.json")) as f:
+        contract_abi_DEX = json.load(f)
+    # Load the contract ABI for GamblerCoin
+    with open(Path("./contract/ABI_COIN.json")) as f:
+        contract_abi_Coin = json.load(f)
+    # Set the contract address (this is the address of the deployed contract)
+    contract_address_DEX = os.getenv("SMART_CONTRACT_ADDRESS_DEX")
+    # Set the contract address (this is the address of the deployed contract)
+    contract_address_Coin = os.getenv("SMART_CONTRACT_ADDRESS_COIN")
+    # Get the contract
+    contract_DEX = w3.eth.contract(address=contract_address_DEX, abi=contract_abi_DEX)
+    # Get the contract
+    contract_coin = w3.eth.contract(
+        address=contract_address_Coin, abi=contract_abi_Coin
+    )
+    return contract_DEX, contract_coin
 
+
+# Load the contract
+contract_DEX, contract_coin = load_contract()
+accounts = w3.eth.accounts
+################################################################################
+# Create two tabs for the application. The first to interact with your wallet and the second to play
 option_list = ["Deposit/Withdrawal Tokens", "Play Game"]
 with st.sidebar:
     ga_sidebar = st.selectbox("What would you like to do?", option_list)
-
-if ga_sidebar == "Deposit/Withdrawal Tokens":
-
-    ################################################################################
-    # Define and connect a new Web3 provider
-    w3 = Web3(Web3.HTTPProvider(os.getenv("WEB3_PROVIDER_URI")))
-    # Load-Contract function
-    @st.cache(allow_output_mutation=True)
-    def load_contract():
-        # Load the contract ABI for DEX
-        with open(Path("./contract/ABI_DEX.json")) as f:
-            contract_abi_DEX = json.load(f)
-        # Load the contract ABI for GamblerCoin
-        with open(Path("./contract/ABI_COIN.json")) as f:
-            contract_abi_Coin = json.load(f)
-        # Set the contract address (this is the address of the deployed contract)
-        contract_address_DEX = os.getenv("SMART_CONTRACT_ADDRESS_DEX")
-        # Set the contract address (this is the address of the deployed contract)
-        contract_address_Coin = os.getenv("SMART_CONTRACT_ADDRESS_COIN")
-        # Get the contract
-        contract_DEX = w3.eth.contract(
-            address=contract_address_DEX, abi=contract_abi_DEX
-        )
-        # Get the contract
-        contract_coin = w3.eth.contract(
-            address=contract_address_Coin, abi=contract_abi_Coin
-        )
-        return contract_DEX, contract_coin
-
-    # Load the contract
-    contract_DEX, contract_coin = load_contract()
-    ################################################################################
-    # Load- Ganache Contracts into Streamlit
-    st.title("GamblerCoin System")
-    st.write("Choose an account to get started")
-    accounts = w3.eth.accounts
-    address = st.selectbox("Select Account", options=accounts)
-    st.markdown("---")
     # Initiate a session state for the player variables
+    address = st.selectbox("Select Account", options=accounts)
+    # Create a session state to save the wallets values
     if "TokensAtTable" not in st.session_state:
         st.session_state["TokensAtTable"] = 0
     if "TokensInWallet" not in st.session_state:
         st.session_state["TokensInWallet"] = contract_coin.functions.balanceOf(
             address
         ).call()
-    st.write(st.session_state)
+
+    st.sidebar.subheader("Overview")
+    st.sidebar.write(f"Table Balance: {st.session_state.TokensAtTable}")
+    st.sidebar.write(f"Balance in wallet: {st.session_state.TokensInWallet}")
+
+if ga_sidebar == "Deposit/Withdrawal Tokens":
+    st.title("GamblerCoin System")
+    st.write("Choose an account to get started")
+    st.markdown("---")
 
     ################################################################################
     # Initiate buttons for different functionalities
     # Create a Buy button to buy tokens
     st.write("Do you want to purchase tokens?")
     amount_tokens = st.number_input("Insert a number", step=1,)
-
     if st.button("Buy Tokens"):
         st.session_state.TokensInWallet += amount_tokens
         amount_wei = amount_tokens / 2500 * 1000000000000000000
@@ -80,7 +80,7 @@ if ga_sidebar == "Deposit/Withdrawal Tokens":
         receipt = w3.eth.get_transaction_receipt(tx_hash)
         st.write("Transaction receipt minded:")
         st.write(dict(receipt))
-
+    st.markdown("---")
     # Create a Sell button to sell tokens
     st.write("Do you want to Sell tokens?")
     sellAmount = st.number_input("Insert a sell amount", step=1)
@@ -90,16 +90,10 @@ if ga_sidebar == "Deposit/Withdrawal Tokens":
             {"from": address, "gas": 1000000}
         )
         receipt_sell = w3.eth.get_transaction_receipt(tx_hash_sell)
-        st.session_state["TokensInWallet"] -= sellAmount
+        st.session_state.TokensInWallet -= sellAmount
         st.write("Transaction receipt minded:")
         st.write(dict(receipt_sell))
-
-    # Display token balance and table balance (i.e., in-game balance)
-    tokenBalance = contract_coin.functions.balanceOf(address).call()
-    st.write(f"Current amount of tokens: {tokenBalance}.")
-    st.write("Send Tokens to the game table")
-    tableCount = st.session_state["TokensAtTable"]
-    st.write(f"You have currently {tableCount} tokens at the table")
+    st.markdown("---")
     # Create a button to add tokens from the players wallet to the table.
     st.write("Send Tokens to the game table")
     tokensToTable = st.number_input(
@@ -111,15 +105,27 @@ if ga_sidebar == "Deposit/Withdrawal Tokens":
         tx_hash_burn = contract_coin.functions.burn(
             address, int(tokensToTable)
         ).transact({"from": address, "gas": 1000000})
-        st.session_state["TokensAtTable"] += tokensToTable
-        st.session_state["TokensInWallet"] = contract_coin.functions.balanceOf(
+        st.session_state.TokensAtTable += tokensToTable
+        st.session_state.TokensInWallet = contract_coin.functions.balanceOf(
             address
         ).call()
         tokenBalance = contract_coin.functions.balanceOf(address).call()
-        st.write(f"You have currently {tableCount} tokens at the table")
+        st.write(
+            f"You have currently {st.session_state.TokensAtTable} tokens at the table"
+        )
         st.write(f"Current amount of tokens in your wallet: {tokenBalance}.")
+    st.markdown("---")
+
+    # For testing purposes only
+    if st.button("Balance of Token"):
+        tokenBalance = contract_coin.functions.balanceOf(address).call()
+        st.write(tokenBalance)
+    if st.button("Reset Table"):
+        for key in st.session_state.keys():
+            del st.session_state[key]
+
     # Button to close the table: all tokens at the table will be minted to the wallet
-    if st.button("Close Table"):
+    if st.sidebar.button("Close Table"):
         # Mint tokensToTable from account of player
         tableCount = st.session_state["TokensAtTable"]
         tokenBalance = st.session_state["TokensInWallet"]
@@ -142,23 +148,9 @@ if ga_sidebar == "Deposit/Withdrawal Tokens":
                 f"You have succesfully closed your table.You had no tokens left at your table."
             )
             st.write(f"Your Current amount of tokens in your wallet:  {tokenBalance}.")
-    # For testing purposes only
-    if st.button("Balance of Token"):
-        tokenBalance = contract_coin.functions.balanceOf(address).call()
-        st.write(tokenBalance)
-    if st.button("Reset Table"):
-        for key in st.session_state.keys():
-            del st.session_state[key]
-
-    # bank_account.deposit()
-    # bank_account.withdraw()
-    # bank_account.display()
-    # bank_account.balance
 
 
 elif ga_sidebar == "Play Game":
-    # tableAccount = st.session_state["TokensAtTable"]
-    st.write(int(st.session_state["TokensAtTable"]))
     # creating an object of class
     # B = Bank_Account()
 
@@ -167,10 +159,12 @@ elif ga_sidebar == "Play Game":
     # B.withdraw()
     # B.display()
     # B.balance
-    @st.cache(allow_output_mutation=True, suppress_st_warning=True)
+    # update_chips_amt = int(st.session_state.TokensAtTable)
+
+    # @st.cache(allow_output_mutation=True, suppress_st_warning=True)
     class Chips:
         def __init__(self):
-            self.total = int(st.session_state["TokensAtTable"])
+            self.total = int(st.session_state.TokensAtTable)
             self.bet = 0
 
         def win_bet(self):
@@ -186,6 +180,7 @@ elif ga_sidebar == "Play Game":
             return self.total
 
         def take_bet(Chips):  # ask for user's bet
+
             while True:
                 try:
                     Chips.bet = int(
@@ -195,7 +190,11 @@ elif ga_sidebar == "Play Game":
                     st.write("Sorry! Please can you type in a number: ")
                 else:
                     if Chips.bet > Chips.total:
-                        st.write("Insufficient funds!")
+                        st.write(
+                            f"Insufficient funds! We put the maximum avaible funds instead: {int(st.session_state.TokensAtTable)}"
+                        )
+                        Chips.bet = int(st.session_state.TokensAtTable)
+                        return False
                     else:
                         break
 
