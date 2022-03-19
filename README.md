@@ -136,6 +136,9 @@ To reload chips, all the player has to do is scroll over to the sidebar and sele
 The next steps to improve the game would be to work through additional bugs in the application, improve functionality of the game, and improve the user interface and user experience. This work would include, at a minimum, the following:
 
 - Error messages that are initially displayed should be removed (although they don't affect the functionality)
-- 
+- Create an oracle for the exchange rate
+- Sign in the game with a username and password
+- Allow multi-player functionality 
+- Design code for a continuous deck of cards
 
 Once the game is improved, it could be deployed and hosted online for people to actively use. However, research into the legal aspects of deploying and operating the game (e.g., gambling license, selling coins, etc.) would need to be done first.
