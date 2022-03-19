@@ -120,6 +120,7 @@ if ga_sidebar == "Deposit/Withdrawal Tokens":
     if st.button("Balance of Token"):
         tokenBalance = contract_coin.functions.balanceOf(address).call()
         st.write(tokenBalance)
+
     if st.button("Reset Table"):
         for key in st.session_state.keys():
             del st.session_state[key]
@@ -151,6 +152,23 @@ if ga_sidebar == "Deposit/Withdrawal Tokens":
 
 
 elif ga_sidebar == "Play Game":
+    # Game settings
+    number_of_decks = 6
+    blackjack_multiplier = 1.5
+
+    # Initialize player, dealer, deck and game play. Cache these variables
+    @st.cache(allow_output_mutation=True, suppress_st_warning=True)
+    def start_game():
+        game_deck = Deck(number_of_decks)
+        dealer = Dealer()
+        player = Player()
+        game_play = GamePlay(player, dealer, game_deck, blackjack_multiplier)
+        return game_deck, dealer, player, game_play
+
+    game_deck, dealer, player, game_play = start_game()
+
+    game_play.update()
+
     # creating an object of class
     # B = Bank_Account()
 
@@ -179,8 +197,7 @@ elif ga_sidebar == "Play Game":
             self.total += self.bet * 1.5
             return self.total
 
-        def take_bet(Chips):  # ask for user's bet
-
+        def take_bet(Chips):
             while True:
                 try:
                     Chips.bet = int(
@@ -198,25 +215,9 @@ elif ga_sidebar == "Play Game":
                     else:
                         break
 
+    st.title("BlackJack Simulator")
     # set up the player's chips
     player_chips = Chips()
-
-    # Game settings
-    number_of_decks = 6
-    blackjack_multiplier = 1.5
-
-    # Initialize player, dealer, deck and game play. Cache these variables
-    @st.cache(allow_output_mutation=True, suppress_st_warning=True)
-    def start_game():
-        game_deck = Deck(number_of_decks)
-        dealer = Dealer()
-        player = Player()
-        game_play = GamePlay(player, dealer, game_deck, blackjack_multiplier)
-        return game_deck, dealer, player, game_play
-
-    game_deck, dealer, player, game_play = start_game()
-
-    st.title("BlackJack Simulator")
 
     Chips.take_bet(player_chips)
 
